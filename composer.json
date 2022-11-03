@@ -28,15 +28,15 @@
         "php": ">=7.4",
         "ext-swoole": ">=4.6",
         "lcobucci/jwt": "~4.1.0",
-        "../../vendor/nesbot/carbon": "^1.0 || ^2.0"
+        "nesbot/carbon": "^1.0 || ^2.0"
     },
     "require-dev": {},
     "suggest": {
-        "../../vendor/hyperf/utils": "required hyperf/utils ~2.2.0",
-        "../../vendor/hyperf/cache": "required hyperf/cache ~2.2.0",
-        "../../vendor/hyperf/command": "required hyperf/command ~2.2.0",
-        "../../vendor/hyperf/config": "required hyperf/config ~2.2.0",
-        "../../vendor/hyperf/di": "required hyperf/di ~2.2.0"
+        "hyperf/utils": "required hyperf/utils ~2.2.0",
+        "hyperf/cache": "required hyperf/cache ~2.2.0",
+        "hyperf/command": "required hyperf/command ~2.2.0",
+        "hyperf/config": "required hyperf/config ~2.2.0",
+        "hyperf/di": "required hyperf/di ~2.2.0"
     },
     "config": {
         "optimize-autoloader": true,
