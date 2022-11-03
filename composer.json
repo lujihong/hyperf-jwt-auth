@@ -1,0 +1,54 @@
+{
+    "name": "lujihong/jwt-auth",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "php",
+        "hyperf"
+    ],
+    "authors": [
+        {
+            "name": "lujihong",
+            "email": "382217590@qq.com",
+            "role": "Developer"
+        }
+    ],
+    "description": "jwt-auth Component",
+    "autoload": {
+        "psr-4": {
+            "Hyperf\\JWTAuth\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HyperfTest\\": "tests"
+        }
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-swoole": ">=4.6",
+        "lcobucci/jwt": "~4.1.0",
+        "../../vendor/nesbot/carbon": "^1.0 || ^2.0"
+    },
+    "require-dev": {},
+    "suggest": {
+        "../../vendor/hyperf/utils": "required hyperf/utils ~2.2.0",
+        "../../vendor/hyperf/cache": "required hyperf/cache ~2.2.0",
+        "../../vendor/hyperf/command": "required hyperf/command ~2.2.0",
+        "../../vendor/hyperf/config": "required hyperf/config ~2.2.0",
+        "../../vendor/hyperf/di": "required hyperf/di ~2.2.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {},
+    "extra": {
+        "hyperf": {
+            "config": "Hyperf\\JWTAuth\\ConfigProvider"
+        },
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
