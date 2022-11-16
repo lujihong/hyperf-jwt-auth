@@ -35,7 +35,7 @@ class JWTUtil
      */
     public static function handleToken(string $token, string $prefix = 'Bearer'): bool|string
     {
-        if ($token) {
+        if($token && str_contains($token, $prefix)) {
             $token = ucfirst($token);
             $arr = explode("{$prefix} ", $token);
             $token = $arr[1] ?? '';

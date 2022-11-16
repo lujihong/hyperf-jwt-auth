@@ -91,6 +91,9 @@ class JWT extends AbstractJWT
     public function checkToken(string $token = null, string $scene = null, bool $validate = true, bool $verify = true, bool $independentTokenVerify = false): ?bool
     {
         try {
+            if($token) {
+                $token = JWTUtil::handleToken($token, $this->tokenPrefix);
+            }
             $token = $token ?: $this->getHeaderToken();
             $tokenObj = $this->getTokenObj($token);
             $scene = $scene ?: $this->getScene();
@@ -144,6 +147,7 @@ class JWT extends AbstractJWT
     {
         try {
             if ($token) {
+                $token = JWTUtil::handleToken($token, $this->tokenPrefix);
                 $claims = $this->getTokenObj($token)->claims()->all();
             } else {
                 $key = $this->getContextKey();
@@ -170,6 +174,7 @@ class JWT extends AbstractJWT
      */
     public function logout(string $token = null, string $scene = null): bool
     {
+        $token = JWTUtil::handleToken($token, $this->tokenPrefix);
         $config = $this->getSceneConfig($scene ?? $this->getScene());
         $this->blackList->addTokenBlack($this->getTokenObj($token), $config);
         return true;
@@ -182,6 +187,9 @@ class JWT extends AbstractJWT
      */
     public function getTokenDynamicCacheTime(string $token = null): float|int
     {
+        if($token) {
+            $token = JWTUtil::handleToken($token, $this->tokenPrefix);
+        }
         $token = $token ?: $this->getHeaderToken();
         $claims = $this->getTokenObj($token)->claims();
         if (!$claims->has(RegisteredClaims::EXPIRATION_TIME)) {
@@ -208,6 +216,7 @@ class JWT extends AbstractJWT
     public function getParserData(string $token = null): array
     {
         if ($token) {
+            $token = JWTUtil::handleToken($token, $this->tokenPrefix);
             $claims = $this->getTokenObj($token)->claims()->all();
             Context::set($this->getContextKey(), $claims); //将解析的结果保存到协程上下文
             return $claims;
