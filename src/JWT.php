@@ -174,7 +174,9 @@ class JWT extends AbstractJWT
      */
     public function logout(string $token = null, string $scene = null): bool
     {
-        $token = JWTUtil::handleToken($token, $this->tokenPrefix);
+        if($token) {
+            $token = JWTUtil::handleToken($token, $this->tokenPrefix);
+        }
         $config = $this->getSceneConfig($scene ?? $this->getScene());
         $this->blackList->addTokenBlack($this->getTokenObj($token), $config);
         return true;
