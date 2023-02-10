@@ -7,9 +7,7 @@ use Hyperf\Command\Command as HyperfCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-/**
- * @Command
- */
+#[Command]
 class JWTCommand extends HyperfCommand
 {
     /**
@@ -17,9 +15,9 @@ class JWTCommand extends HyperfCommand
      *
      * @var string
      */
-    protected $name = 'jwt:publish';
+    protected ?string $name = 'jwt:publish';
 
-    public function handle()
+    public function handle(): void
     {
         // 从 $input 获取 config 参数
         $argument = $this->input->getOption('config');
@@ -39,7 +37,7 @@ class JWTCommand extends HyperfCommand
     protected function getOptions(): array
     {
         return [
-            ['config', NULL, InputOption::VALUE_NONE, 'Publish the configuration for jwt-auth']
+            ['config', null, InputOption::VALUE_NONE, 'Publish the configuration for jwt-auth']
         ];
     }
 
