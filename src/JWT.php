@@ -103,7 +103,7 @@ class JWT extends AbstractJWT
 
             // 验证token是否存在黑名单
             if ($config['blacklist_enabled'] && $validate && $this->blackList->hasTokenBlack($claimsData, $config)) {
-                throw new TokenValidException('token has been blacked out', 4000);
+                throw new TokenValidException('Token has been blacked out', 4000);
             }
 
             //token验证
@@ -112,8 +112,10 @@ class JWT extends AbstractJWT
             }
 
             // 获取当前环境的场景配置并且验证该token是否是该配置生成的
-            if ($independentTokenVerify) {
-                $config = $this->getSceneConfig($this->getScene());
+            if ($independentTokenVerify && isset($claimsData['jwt_scene'])) {
+                if($claimsData['jwt_scene'] !== $scene) {
+                    throw new TokenValidException('Token scenario value is not legal', 4002);
+                }
             }
 
             //将解析的结果保存到协程上下文
@@ -130,11 +132,10 @@ class JWT extends AbstractJWT
                     Context::set('ExchangeToken', $this->refreshToken($token));
                 }
             }
-
-            return true;
         } catch (\RuntimeException $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e->getPrevious());
         }
+        return true;
     }
 
     /**
