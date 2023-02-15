@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Hyperf\JWTAuth;
 
 use Lcobucci\JWT\Token\Plain;
@@ -63,7 +64,7 @@ class BlackList extends AbstractJWT
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function hasTokenBlack(array $claims, array $config = [])
+    public function hasTokenBlack(array $claims, array $config = []): bool
     {
         $cacheKey = $this->getCacheKey($claims['jti']);
         if ($config['blacklist_enabled'] && $config['login_type'] === 'mpop') {
@@ -74,7 +75,7 @@ class BlackList extends AbstractJWT
         if ($config['blacklist_enabled'] && $config['login_type'] === 'sso') {
             $val = $this->cache->get($cacheKey);
             // 这里为什么要大于等于0，因为在刷新token时，缓存时间跟签发时间可能一致，详细请看刷新token方法
-            if (! is_null($claims['iat']) && !empty($val['valid_until'])) {
+            if (!is_null($claims['iat']) && !empty($val['valid_until'])) {
                 $isFuture = ($claims['iat']->getTimestamp() - $val['valid_until']) >= 0;
             } else {
                 $isFuture = false;

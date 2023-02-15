@@ -83,12 +83,11 @@ class JWT extends AbstractJWT
      * @param string|null $token
      * @param string|null $scene
      * @param bool $validate
-     * @param bool $verify
      * @param bool $independentTokenVerify true时会验证当前场景配置是否是生成当前的token的配置，需要配合自定义中间件实现，false会根据当前token拿到原来的场景配置，并且验证当前token
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function checkToken(string $token = null, string $scene = null, bool $validate = true, bool $verify = true, bool $independentTokenVerify = false): ?bool
+    public function checkToken(string $token = null, string $scene = null, bool $validate = true, bool $independentTokenVerify = false): ?bool
     {
         try {
             if($token) {
@@ -103,12 +102,13 @@ class JWT extends AbstractJWT
             $signer = new $config['supported_algs'][$config['alg']];
 
             // 验证token是否存在黑名单
-            if ($config['blacklist_enabled'] && $this->blackList->hasTokenBlack($claimsData, $config)) {
-                throw new TokenValidException('Token authentication does not pass', 401);
+            if ($config['blacklist_enabled'] && $validate && $this->blackList->hasTokenBlack($claimsData, $config)) {
+                throw new TokenValidException('token has been blacked out', 4000);
             }
 
+            //token验证
             if ($validate && !$this->validateToken($signer, $this->getKey($config), $token)) {
-                throw new TokenValidException('Token authentication does not pass', 401);
+                throw new TokenValidException('Token authentication does not pass', 4001);
             }
 
             // 获取当前环境的场景配置并且验证该token是否是该配置生成的
