@@ -60,7 +60,7 @@ abstract class AbstractJWT implements JWTInterface
     /**
      * @var string
      */
-    private string $scenePrefix = 'scene';
+    protected string $scenePrefix = 'scene';
 
     /**
      * @var ContainerInterface
@@ -70,13 +70,13 @@ abstract class AbstractJWT implements JWTInterface
     /**
      * @var ConfigInterface
      */
-    private ConfigInterface $config;
+    protected ConfigInterface $config;
 
     /**
      * jwt配置前缀
      * @var string
      */
-    private string $configPrefix = 'jwt';
+    protected string $configPrefix = 'jwt';
 
     /**
      * @param ContainerInterface $container

@@ -93,7 +93,7 @@ class JWT extends AbstractJWT
     public function checkToken(string $token = null, string $scene = null, bool $validate = true, bool $independentTokenVerify = false): ?bool
     {
         try {
-            if($token) {
+            if ($token) {
                 $token = JWTUtil::handleToken($token, $this->tokenPrefix);
             }
             $token = $token ?: $this->getHeaderToken();
@@ -116,7 +116,7 @@ class JWT extends AbstractJWT
 
             // 获取当前环境的场景配置并且验证该token是否是该配置生成的
             if ($independentTokenVerify && isset($claimsData['jwt_scene'])) {
-                if($claimsData['jwt_scene'] !== $scene) {
+                if ($claimsData['jwt_scene'] !== $scene) {
                     throw new TokenValidException('Token scenario value is not legal', 4002);
                 }
             }
@@ -125,18 +125,19 @@ class JWT extends AbstractJWT
             Context::set($this->getContextKey($scene), $claimsData);
 
             //获取token动态有效时间
-            if (!$claims->has(RegisteredClaims::EXPIRATION_TIME)) {
-                $timeUtil = TimeUtil::timestamp($claims->get(RegisteredClaims::EXPIRATION_TIME));
+            if ($claims->has(RegisteredClaims::EXPIRATION_TIME)) {
+                $dateTimeImmutable = $claims->get(RegisteredClaims::EXPIRATION_TIME);
+                $timeUtil = TimeUtil::timestamp($dateTimeImmutable->getTimestamp());
                 $timeRemaining = $timeUtil->max(TimeUtil::now())->diffInSeconds();
 
                 //token 10分钟后失效时提醒前端覆盖掉原来的token
                 if ($timeRemaining < 600) {
                     //token自动续期，在响应头中返回ExchangeToken，前端拿到后覆盖到本地保存
-                    Context::set('ExchangeToken', $this->refreshToken($token));
+                    Context::set($this->getRefreshedTokenKey($scene), $this->refreshToken($token));
                 }
             }
-        } catch (\RuntimeException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e->getPrevious());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage(), $e->getCode(), $e->getPrevious());
         }
         return true;
     }
@@ -163,8 +164,8 @@ class JWT extends AbstractJWT
             }
             unset($claims['iat'], $claims['nbf'], $claims['exp'], $claims['jti']);
             $token = $this->getToken($claims);
-        } catch (\RuntimeException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e->getPrevious());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage(), $e->getCode(), $e->getPrevious());
         }
         return $token;
     }
@@ -178,11 +179,15 @@ class JWT extends AbstractJWT
      */
     public function logout(string $token = null, string $scene = null): bool
     {
-        if($token) {
-            $token = JWTUtil::handleToken($token, $this->tokenPrefix);
+        try {
+            if ($token) {
+                $token = JWTUtil::handleToken($token, $this->tokenPrefix);
+            }
+            $config = $this->getSceneConfig($scene ?? $this->getScene());
+            $this->blackList->addTokenBlack($this->getTokenObj($token), $config);
+        } catch (\Exception $e) {
+            return false;
         }
-        $config = $this->getSceneConfig($scene ?? $this->getScene());
-        $this->blackList->addTokenBlack($this->getTokenObj($token), $config);
         return true;
     }
 
@@ -193,16 +198,37 @@ class JWT extends AbstractJWT
      */
     public function getTokenDynamicCacheTime(string $token = null): float|int
     {
-        if($token) {
+        if ($token) {
             $token = JWTUtil::handleToken($token, $this->tokenPrefix);
         }
         $token = $token ?: $this->getHeaderToken();
         $claims = $this->getTokenObj($token)->claims();
-        if (!$claims->has(RegisteredClaims::EXPIRATION_TIME)) {
-            $timeUtil = TimeUtil::timestamp($claims->get(RegisteredClaims::EXPIRATION_TIME));
+        if ($claims->has(RegisteredClaims::EXPIRATION_TIME)) {
+            $dateTimeImmutable = $claims->get(RegisteredClaims::EXPIRATION_TIME);
+            $timeUtil = TimeUtil::timestamp($dateTimeImmutable->getTimestamp());
             return $timeUtil->max(TimeUtil::now())->diffInSeconds();
         }
         return -1;
+    }
+
+    /**
+     * 获取已刷新的token
+     * @return string
+     */
+    public function getRefreshedTokenKey(string $scene = 'default')
+    {
+        return $this->config->get("{$this->configPrefix}.{$this->scenePrefix}.{$scene}.refreshed_token_key");
+    }
+
+    /**
+     * 根据上下文获取新token
+     * @param string $scene
+     * @return mixed|null
+     */
+    public function getTokenByContext(string $scene = 'default'): ?string
+    {
+        $key = $this->getRefreshedTokenKey($scene);
+        return Context::has($key) ? Context::get($key) : null;
     }
 
     /**
